@@ -9,6 +9,7 @@ String.prototype.empty = () => {
 };
 
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const config = require('./config');
 
 module.exports = {
@@ -31,7 +32,9 @@ module.exports = {
 
         for(let i = 0; i < params.length; i++){
 
-            if(params[i].empty()){
+            if(typeof params[i] == 'str' && params[i].empty()){
+                return { error : true, msg : 'Campo(s) inválido(s)' };
+            }else if(typeof params[i] == 'number' && parseInt(params[i]) == NaN){
                 return { error : true, msg : 'Campo(s) inválido(s)' };
             }
 
@@ -41,14 +44,37 @@ module.exports = {
 
     },
 
-    get_session_id : (req) => {
+    get_session_id : (req, res) => {
 
         const token = req.headers.authorization.split(' ')[1];
-        const s_id = jwt.verify(token, config.security.session.sess_key);
+        
+        try{            
+            const s_id = jwt.verify(token, config.security.session.sess_key);
+            return parseInt(s_id.id);
+        }catch(e){
+            return res.status(401).json({ error : true, msg : 'Não autorizado(a)' });
+        }
 
-        return s_id;
 
-    }
+    },
+
+    hash_password : (plain_password, callback) => {
+
+        if (typeof callback != 'function') throw new Error('Invalid callback');
+
+        bcrypt.genSalt(config.security.encryptation.salt_rounds, (err, salt) => {
+            bcrypt.hash(plain_password, salt, (err, hash) => { callback(err, hash) });
+        });
+
+    },
+
+    compare_password : (plain_password, hash, callback) => {
+
+        if (typeof callback != 'function') throw new Error('Invalid callback');
+
+        bcrypt.compare(plain_password, hash, (err, result) => { callback(err, result) });
+
+    },
 
 
 };

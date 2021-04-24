@@ -20,14 +20,16 @@ module.exports = {
 
     security : {
         session : {
-            sess_key : '__SECRET_SESS_KEY__',
-            sess_timeout : 300, // 5 minutos
+            sess_key : '$2b$10$zzNkvLHEUdWqiCLC306I0evit4YfmOXtaxirlcw51d/Qq5ZSKYbVS',
+            sess_timeout : 60 * 30, // 30 minutos
+            sess_timeout_max : (60 * 60 * 24) * 7 // 7 dias
         },
         cookies : {
-            secret : '__SECRET_COOKIES_KEY__'
+            secret : '$2b$10$RPmLbyZBnXPxGZwuH0jp5uAhQeK/VrBlY8TfX/OfQN5iDQreOhmmK'
         },
         encryptation : {
-            algorithm : 'aes256'
+            algorithm : 'aes256',
+            salt_rounds : 10
         }
     },
 

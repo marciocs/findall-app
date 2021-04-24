@@ -13,8 +13,12 @@ module.exports = {
         next();
     },
 
-    redirect_https : (req, res) => {
-        res.redirect(`https://${req.headers.host}${req.url}`);
+    redirect_https : (req, res, next) => {
+        console.log(req.protocol);
+        if(req.protocol != 'https'){
+            return res.redirect(`https://${req.headers.host}${req.url}`);
+        }
+        next();
     },
 
     sess_verification : (req, res, next) => {
