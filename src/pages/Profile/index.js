@@ -1,29 +1,70 @@
-import React from 'react';
+import React, { Component } from 'react';
+import { SecureStore } from 'expo';
 import { View, StyleSheet, Text, Image } from 'react-native';
 
-import userImg from '../../assets/steve-jobs.png'
+import userImg from '../../assets/steve-jobs.png';
 
-export default function Profile() {
-    return (
-        <View style={styles.container}>
-            <View>
-                <Text style={styles.greeting}>Lv 38</Text>
-                <Text style={styles.username}>Steve Jobs</Text>
-                <Text style={styles.username}>Pontos 1885</Text>
+import { Api } from '../../../libs/api';
+
+export default class Profile extends Component {
+    
+    constructor() {
+        this.state = {user_info : {
+            nome : '',
+            pontos : '',
+            endereco : '',
+            telefone : '',
+            cpf : ''
+        }};
+    }
+
+    componentDidMount(){
+
+        try{
+        
+            SecureStore.getItemAsync('token').then((token) => {
+
+                /*reqs.user_info(token, (results) => {
+    
+                    if(results.error){
+                        return console.error(results.msg);
+                    }
+    
+                    this.setState({ user_info : results.results });
+    
+                });*/
+
+            })
+
+        
+        }catch(err){
+            console.error(err);
+        }
+
+    }
+
+    render(){
+        return (
+            <View style={styles.container}>
+                <View>
+                    {/* <Text style={styles.greeting}>Lv 38</Text> */}
+                    <Text style={styles.username}>{this.state.user_info[0].nome}</Text>
+                    <Text style={styles.username}>Pontos {this.state.user_info[0].pontos}</Text>
+                </View>
+
+                <Image style={styles.imageuser} source={userImg} />
+
+                <View>
+                    <Text>{this.state.user_info[0].nome}</Text>
+                    <Text>{this.state.user_info[0].endereco}</Text>
+                    <Text>California</Text>
+                    <Text>{this.state.user_info[0].telefone}</Text>
+                    <Text>{this.state.user_info[0].cpf}</Text>
+                </View>
+
             </View>
-
-            <Image style={styles.imageuser} source={userImg} />
-
-            <View>
-                <Text>Steve Jobs Apple</Text>
-                <Text>Rua Maça colorida, 1884</Text>
-                <Text>California</Text>
-                <Text>Telefone</Text>
-                <Text>CPF</Text>
-            </View>
-
-        </View>
-    );
+        );
+    }
 }
 
 const styles = StyleSheet.create({

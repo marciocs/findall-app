@@ -55,6 +55,7 @@ const fs = require('fs');
 const utils = require('./lib/utils');
 const config = require('./lib/config');
 const middlewares = require('./lib/middlewares');
+const { exit } = require('process');
 const cursor = mysql.createConnection(config.mysql);
 
 cursor.connect(function(err){
@@ -63,7 +64,7 @@ cursor.connect(function(err){
 
 app.use(helmet());
 app.use(cors());
-app.use(middlewares.redirect_https);
+//app.use(middlewares.redirect_https);
 app.use(cookieParser(config.security.cookies.secret));
 app.use(express.urlencoded({ extended : false }));
 app.use(express.json())
@@ -122,9 +123,21 @@ app.post('/login', middlewares.csrf_verification, (req, res, next) => {
 
     const { usuario_email, senha, stay_connected } = req.body;
 
+    if(typeof usuario_email != 'string'){
+        return res.json({ error : true, msg : 'Usuário/Email inválido' });
+    }
+
+    if(typeof senha != 'string'){
+        return res.json({ error : true, msg : 'Senha inválida' });
+    }
+
+    if((usuario_email || senha) == null){
+        return res.json({ error : true, msg : 'Preencha todos os campos' });
+    }
+
     if(usuario_email.empty() || senha.empty()) return res.json({ error : true, msg : 'Usuário e/ou senha não preenchido(s) ' });
 
-    cursor.query(`SELECT id,senha FROM usuarios WHERE usuario OR email IN (?) LIMIT 1`, [usuario_email], (err, results) => {
+    cursor.query(`SELECT id,senha FROM usuarios WHERE usuario = ? OR email = ?`, [usuario_email,usuario_email], (err, results) => {
 
         if (err) utils.error_handle(config.dev, err);
 
@@ -222,7 +235,7 @@ app.get('/user_info', middlewares.sess_verification, (req, res, next) => {
             return res.json({ error : false, results });
         }
 
-        return res.json({ })
+        return res.json({ error : true, msg : 'Usuário não encontrado' });
 
     });
 
@@ -232,20 +245,20 @@ app.get('/test', (req, res) => {
     res.status(200).json(req.body);
 });
 
-const https_server = https.createServer({
+/*const https_server = https.createServer({
     key : fs.readFileSync('./lib/ssl/localhost.key'),
     cert : fs.readFileSync('./lib/ssl/localhost.crt')
-}, app);
+}, app);*/
 
 const http_server = http.createServer(app, (req, res) => {
-    return res.writeHead(301, { 'Location' : `https://${req.headers.host}${req.url}` });
+    /*return res.writeHead(301, { 'Location' : `https://${req.headers.host}${req.url}` });*/
 });
 
-https_server.listen(config.server.https_port, () => {
+/*https_server.listen(config.server.https_port, () => {
     console.log(`[SSL_API] on https://127.0.0.1:${config.server.https_port}`);
-});
+});*/
 
-http_server.listen(config.server.http_port, () => {
+http_server.listen(config.server.http_port, '0.0.0.0', () => {
     console.log(`[API] on http://127.0.0.1:${config.server.http_port}`);
 });
 
