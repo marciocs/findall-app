@@ -1,29 +1,90 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { View, StyleSheet, Text, Image } from 'react-native';
 
-import userImg from '../../assets/steve-jobs.png'
+import userImg from '../../assets/steve-jobs.png';
 
-export default function Profile() {
-    return (
-        <View style={styles.container}>
-            <View>
-                <Text style={styles.greeting}>Lv 38</Text>
-                <Text style={styles.username}>Steve Jobs</Text>
-                <Text style={styles.username}>Pontos 1885</Text>
+import { Api } from '../../../libs/api';
+import { config } from './../../../libs/config';
+import { Secure } from '../../../libs/secure';
+
+const api_config = config.api;
+const reqs = new Api(`${api_config.uri}:${api_config.port}`);
+
+const sec = new Secure();
+
+export default class Profile extends Component {
+    
+    constructor(props) {
+        
+        super(props);
+        
+        this.state = {user_info : [{
+            nome : '',
+            pontos : '',
+            endereco : '',
+            telefone : '',
+            cpf : ''
+        }]};
+
+        this.navigateToLogin = this.navigateToLogin.bind(this);
+
+    }
+
+    componentDidMount(){
+
+        try{
+            sec.check_authenticated()
+                .then((auth) => {                
+                    
+                    if(!auth) { this.navigateToLogin();return }
+
+                    reqs.user_info(token)
+                        .then(resp => resp.json())
+                        .then(results => {
+                                        
+                            if(results.error){
+                                throw err;
+                            }
+                            
+                            this.setState({ user_info : results.results });
+
+                        }).catch(err => { throw err });
+
+                })
+                .catch(err => { throw err })
+            
+            }catch(err){
+                throw err;
+            }
+
+    }
+
+    navigateToLogin(){
+        this.props.navigation.navigate('Login')
+    }
+
+    render(){
+        return (
+            <View style={styles.container}>
+                <View>
+                    <Text style={styles.greeting}>Lv 38</Text>
+                    <Text style={styles.username}>{this.state.user_info[0].nome}</Text>
+                    <Text style={styles.username}>Pontos {this.state.user_info[0].pontos}</Text>
+                </View>
+
+                <Image style={styles.imageuser} source={userImg} />
+
+                <View>
+                    <Text>{this.state.user_info[0].nome}</Text>
+                    <Text>{this.state.user_info[0].endereco}</Text>
+                    <Text>California</Text>
+                    <Text>{this.state.user_info[0].telefone}</Text>
+                    <Text>{this.state.user_info[0].cpf}</Text>
+                </View>
+
             </View>
-
-            <Image style={styles.imageuser} source={userImg} />
-
-            <View>
-                <Text>Steve Jobs Apple</Text>
-                <Text>Rua Maça colorida, 1884</Text>
-                <Text>California</Text>
-                <Text>Telefone</Text>
-                <Text>CPF</Text>
-            </View>
-
-        </View>
-    );
+        );
+    }
 }
 
 const styles = StyleSheet.create({
