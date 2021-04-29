@@ -1,19 +1,15 @@
 import React, { Component } from 'react';
 import { View, Image, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import * as SecureStore from 'expo-secure-store';
 
 import logo from '../../assets/Logo_Brn_1x.png';
+
 import { Api } from './../../../libs/api';
 import { config } from './../../../libs/config';
+import * as Storage from './../../../libs/storage';
 
 const api_config = config.api;
-
 const reqs = new Api(`${api_config.uri}:${api_config.port}`);
-
-const save = async (key, value) => {
-    await SecureStore.setItemAsync(key, value);
-}
 
 export default class Login extends Component {
 
@@ -24,44 +20,52 @@ export default class Login extends Component {
         this.state = { usuario_email : null, senha : null };
 
         this.doLogin = this.doLogin.bind(this);
+        this.navigateToHome = this.navigateToHome.bind(this);
+        this.navigateToRegister = this.navigateToRegister.bind(this);
+        this.navigateToRecoveryPassword = this.navigateToRecoveryPassword.bind(this);
+        this.navigateToHome = this.navigateToHome.bind(this);
+        this.navigateToProfile = this.navigateToProfile.bind(this);
 
     }
 
     componentDidMount(){        
         Icon.loadFont();
+        Storage.del('token')
+        //this.navigateToProfile();
     }
 
     doLogin(){
 
-        console.log('state', this.state);
+        reqs.login(this.state.usuario_email, this.state.senha)
+            .then(resp => resp.json())
+            .then(results => {
 
-        reqs.login(this.state.usuario_email, this.state.senha, false, (results) => {
+                if(results.error){
+                    throw new Error(results.msg);
+                }
 
-            console.log('results', results);
+                Storage.save('token', results.token).then(() => this.navigateToProfile())
 
-            if(results.error){
-                console.error('ERROR=>', results.msg);
-                return;
-            }
-
-            save('token', results.token);
-
-        });
+            })
+            .catch(err => { throw err });
 
     }
 
     navigateToRegister() {
-        navigation.navigate('Register')
+        this.props.navigation.navigate('Register')
     }
 
     navigateToHome() {
-        navigation.navigate('Home')
+        this.props.navigation.navigate('Home')
     }
 
     navigateToRecoveryPassword() {
-        navigation.navigate('RecoveryPassword')
+        this.props.navigation.navigate('RecoveryPassword')
     }
 
+    navigateToProfile(){        
+        this.props.navigation.navigate('Profile')
+    }
 
     render(){
         return (
@@ -83,6 +87,7 @@ export default class Login extends Component {
                     <Text style={styles.label}> Senha* </Text>
                     <TextInput
                         style={styles.input}
+                        secureTextEntry={true}
                         placeholder="Senha"
                         placeholderTextColor="#999"
                         autoCompleteType="password"
@@ -98,7 +103,7 @@ export default class Login extends Component {
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.button}
-                        onPress={this.doLogin}
+                        onPress={this.navigateToHome}
                     >
                         <Text style={styles.buttonText}>
                             Entrar
@@ -114,7 +119,7 @@ export default class Login extends Component {
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.buttonRegister}
-                    // onPress={navigateToRegister}
+                        onPress={this.navigateToHome}
                     >
 
                         <Text style={styles.buttonTextGoogle}>

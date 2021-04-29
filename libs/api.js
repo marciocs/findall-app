@@ -4,98 +4,94 @@ export class Api {
         this.api_url = api_url;
     }
 
-    login(usuario_email, senha, stay_connected=false, callback=null){
-
-        if (typeof callback != 'function') return { error : true, msg : 'invalid function' };
+    async login(usuario_email, senha, stay_connected=false){
         
-        fetch(this.api_url + '/login',
-            {
-                method : 'POST',
-                headers : {
-                    'Content-type' : 'application/json'
-                },
-                body : JSON.stringify({
-                    usuario_email,
-                    senha,
-                    stay_connected
-                })
-            }
-        )
-        .then(resp => resp.json())
-        .then(resp_json => callback(resp_json))
-        .catch(err => console.log(err));
+        try{
+            return fetch(this.api_url + '/login',
+                {
+                    method : 'POST',
+                    headers : {
+                        'Content-type' : 'application/json'
+                    },
+                    body : JSON.stringify({
+                        usuario_email,
+                        senha,
+                        stay_connected
+                    })
+                }
+            )
+        }catch(err){
+            throw err;
+        }
 
     }
 
-    register(nome, usuario, senha, email, tipo, endereco, telefone, cpf, callback){
+    async register(email, nome, senha, endereco, telefone, cpf, tipo='USUARIO'){
         
-        if (typeof callback != 'function') return { error : true, msg : 'invalid function' };
-        
-        fetch(this.api_url + '/register',
-            {
-                headers : {
-                    'Content-type' : 'application/json'
-                },
-                body : JSON.stringify({
-                    nome : nome,
-                    usuario : usuario,
-                    senha : senha,
-                    email : email,
-                    tipo : tipo,
-                    endereco : endereco,
-                    telefone : telefone,
-                    cpf : cpf
-                })
-            }
-        )
-        .then(resp => resp.json())
-        .then(resp_json => callback(resp_json))
-        .catch(err => console.log(err));
+        try{
+            return fetch(this.api_url + '/register',
+                {
+                    method : 'POST',
+                    headers : {
+                        'Content-type' : 'application/json'
+                    },
+                    body : JSON.stringify({
+                        nome : nome,
+                        senha : senha,
+                        email : email,
+                        endereco : endereco,
+                        telefone : telefone,
+                        cpf : cpf,
+                        tipo : tipo
+                    })
+                }
+            )
+        }catch(err){
+            throw err;
+        }
 
     }
 
-    user_info(token, callback=null){
-
-        if (typeof callback != 'function') return { error : true, msg : 'invalid callback' };
+    async user_info(token){
 
         if(!token) return { error : true, msg : 'invalid token' };
 
-        fetch(this.api_url + '/user_info',
-            {
-                method : 'GET',
-                headers : {
-                    'Content-type' : 'application/json',
-                    'Authorization' : `Bearer ${token}`
-                }                
-            }
-        )
-        .then(resp => resp.json())
-        .then(resp_json => callback(resp_json))
-        .catch(err => console.log(err));
+        try{
+            return fetch(this.api_url + '/user_info',
+                {
+                    method : 'GET',
+                    headers : {
+                        'Content-type' : 'application/json',
+                        'Authorization' : `Bearer ${token}`
+                    }                
+                }
+            )
+        }catch(err){
+            throw err;
+        }
 
     }
 
-    add_points(destino, token, callback=null){
-
-        if (typeof callback != 'function') return { error : true, msg : 'invalid function' };
+    async add_points(destino, token){
 
         if(!token) return { error : true, msg : 'invalid token' };
 
-        fetch(this.api_url, + '/add_points', 
-            {
-                method : 'POST',
-                headers : {
-                    'Content-type' : 'application/json',
-                    'Authorization' : `Bearer ${token}`
-                },
-                body : JSON.stringify({
-                    destino : destino
-                })
-            }
-        )
-        .then(resp => resp_json)
-        .then(resp_json => callback(resp_json))
-        .catch(err => console.log(err));
+        try{
+            return fetch(this.api_url, + '/add_points', 
+                {
+                    method : 'POST',
+                    headers : {
+                        'Content-type' : 'application/json',
+                        'Authorization' : `Bearer ${token}`
+                    },
+                    body : JSON.stringify({
+                        destino : destino
+                    })
+                }
+            )
+        }catch(err){
+            throw err;
+        }
 
     }
 

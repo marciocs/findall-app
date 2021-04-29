@@ -76,19 +76,25 @@ app.get('/', middlewares.csrf_verification, (req, res, next) => {
 // cadastrar usuarios
 app.post('/register', middlewares.csrf_verification, (req, res, next) => {
     
+    console.log(req.body);
+
     const check = utils.check_params(req.body);
 
+    console.log('isValid', ':', check);
+
     if(!check){
-        return res.json(check);
+        return res.json({ error : true, msg : 'Campo(s) inválido(s)' });
     }else{
 
-        const { nome, usuario, senha, email, tipo, endereco, telefone, cpf } = req.body;
+        const { nome, senha, email, tipo, endereco, telefone, cpf } = req.body;
+
+        console.log(nome, senha, email, tipo, endereco, telefone, cpf);
 
         utils.hash_password(senha, (err, hash) => {
 
             if (err) utils.error_handle(config.dev, err);
 
-            cursor.query(`INSERT INTO usuarios (nome,usuario,senha,email,tipo,pontos,endereco,telefone,cpf) VALUES (?,?,?,?,?,?,?,?,?)`, [nome,usuario,email,hash,tipo,endereco,telefone,cpf], (err, results) => {
+            cursor.query(`INSERT INTO usuarios (nome,senha,email,tipo,endereco,telefone,cpf,pontos) VALUES (?,?,?,?,?,?,?,?)`, [nome,hash,email,tipo,endereco,telefone,cpf,0], (err, results) => {
     
                 if(err) utils.error_handle(config.dev, err);
 

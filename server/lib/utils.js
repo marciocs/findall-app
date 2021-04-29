@@ -1,12 +1,6 @@
-String.prototype.empty = () => {
-    
-    var str = this;
-    
-    if(str.length == 0 || str == null || str == '' || !str) 
-        return true;
-    return false;
-
-};
+String.prototype.empty = function() {
+    return this.length === 0 || this == " " || /^\s*$/.test(this);
+}
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -26,21 +20,21 @@ module.exports = {
 
     check_params : (params) => {
 
-        if(params.length==0){
-            return false;
-        }
+        let valid = true;
 
-        for(let i = 0; i < params.length; i++){
+        Object.keys(params).forEach((key) => {
 
-            if(typeof params[i] == 'str' && params[i].empty()){
-                return { error : true, msg : 'Campo(s) inválido(s)' };
-            }else if(typeof params[i] == 'number' && parseInt(params[i]) == NaN){
-                return { error : true, msg : 'Campo(s) inválido(s)' };
+            if(typeof params[key] == 'string' && params[key].empty()){
+                valid = false;
+            }
+            
+            if(typeof params[key] == 'number' && parseInt(params[key]) == NaN){
+                valid = false;
             }
 
-        }
+        });
 
-        return true;
+        return valid;
 
     },
 
